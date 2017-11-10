@@ -21,4 +21,8 @@ class GroceryCart
     raise TypeError unless item.is_a?(GroceryItem)
     stuff << item
   end
+
+  def checkout
+    "".upcase
+  end
 end

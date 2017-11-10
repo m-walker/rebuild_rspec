@@ -55,12 +55,22 @@ class DescribeBlock
   end
 end
 
-class Test < Struct.new(:parent, :description, :test)
+class Test
+  attr_reader :parent, :description, :test, :stubbed_receivers
+  def initialize(parent, description, test)
+    @parent = parent
+    @description = description
+    @test = test
+    @stubbed_receivers = []
+  end
+
   def evaluate!
     instance_exec(&test)
     puts "#{parent.subject} #{description}".green
   rescue AssertionError
     puts "FAILED - #{description}".red
+  ensure
+    @stubbed_receivers.each(&:unstub)
   end
 
   def expect(subject)
@@ -81,6 +91,46 @@ class Test < Struct.new(:parent, :description, :test)
     else
       super
     end
+  end
+
+  def allow_any_instance_of(thing_to_stub)
+    stub = Receiver.new(thing_to_stub)
+    @stubbed_receivers << stub
+    stub
+  end
+
+  def receive(method_name)
+    Stub.new(method_name)
+  end
+end
+
+
+class Receiver
+  attr_reader :thing_to_stub, :stub, :old_method
+  def initialize(thing_to_stub)
+    @thing_to_stub = thing_to_stub
+  end
+
+  def to(stub)
+    @stub = stub
+    @old_method = thing_to_stub.instance_method(stub.method_name)
+    thing_to_stub.send(:define_method, stub.method_name) { stub.return_value }
+  end
+
+  def unstub
+    thing_to_stub.send(:define_method, stub.method_name, old_method)
+  end
+end
+
+class Stub
+  attr_reader :method_name, :return_value
+  def initialize(method_name)
+    @method_name = method_name
+  end
+
+  def and_return(return_value)
+    @return_value = return_value
+    self
   end
 end
 

@@ -15,4 +15,14 @@ describe GroceryCart do
   it "starts out empty" do
     expect(cart.stuff.empty?).to eq(true)
   end
+
+  it "can checkout" do
+    allow_any_instance_of(String).to(receive(:upcase).and_return("YOU CHECKED OUT"))
+
+    expect(cart.checkout).to eq("YOU CHECKED OUT")
+  end
+
+  it "by default, checkout says nothing" do
+     expect(cart.checkout).to eq("")
+  end
 end
