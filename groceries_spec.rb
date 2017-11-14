@@ -1,5 +1,10 @@
 require_relative 'my_rspec'
 require_relative 'groceries'
+require_relative 'my_rspec/describe_block'
+require_relative 'my_rspec/test'
+require_relative 'my_rspec/receiver'
+require_relative 'my_rspec/stub'
+require_relative 'my_rspec/condition'
 
 describe GroceryCart do
   let!(:cart) { GroceryCart.new }
